@@ -1,6 +1,59 @@
+import axios from 'axios';
+import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import React from 'react';
+import { SearchChanel } from '../models/Api.model';
 
-const Home = () => {
+export const getServerSideProps: GetServerSideProps<{
+    youtube: SearchChanel;
+}> = async () => {
+    try {
+        const { data } = await axios<SearchChanel>({
+            url: process.env.URL,
+            params: {
+                channelId: 'UCbulh9WdLtEXiooRcYK7SWw',
+                part: 'snippet,id',
+                maxResults: '10',
+                order: 'date',
+            },
+            headers: {
+                'X-RapidAPI-Key': process.env.APIKEY,
+                'X-RapidAPI-Host': 'youtube-v31.p.rapidapi.com',
+            },
+        });
+        return {
+            props: {
+                youtube: data,
+            },
+        };
+    } catch (error) {
+        return {
+            notFound: true,
+        };
+    }
+};
+
+const ComponentCardYoutube = ({ img, title }) => {
+    return (
+        <div className="group relative">
+            <div className="w-full bg-gray-200 aspect-w-1 aspect-h-1 rounded-md overflow-hidden group-hover:opacity-75 lg:aspect-none">
+                <img src={img} alt="" className="w-full" />
+            </div>
+            <div className="mt-4 flex justify-between">
+                <h3 className="text-sm text-gray-700">
+                    <span
+                        aria-hidden="true"
+                        className="absolute inset-0"
+                    ></span>
+                    {title}
+                </h3>
+            </div>
+        </div>
+    );
+};
+
+const Home = ({
+    youtube,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
     return (
         <div>
             <div className="relative bg-white overflow-hidden">
@@ -89,20 +142,13 @@ const Home = () => {
                         Last YouTube Videos
                     </h2>
                     <div className="mt-6 grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-                        <div className="group relative">
-                            <div className="w-full bg-gray-200 aspect-w-1 aspect-h-1 rounded-md overflow-hidden group-hover:opacity-75 lg:aspect-none">
-                                <img src="" alt="" className="w-full" />
-                            </div>
-                            <div className="mt-4 flex justify-between">
-                                <h3 className="text-sm text-gray-700">
-                                    <span
-                                        aria-hidden="true"
-                                        className="absolute inset-0"
-                                    ></span>
-                                    title
-                                </h3>
-                            </div>
-                        </div>
+                        {youtube.items.map((el) => (
+                            <ComponentCardYoutube
+                                img={el.snippet.thumbnails.high.url}
+                                title={el.snippet.title}
+                                key={el.snippet.channelId}
+                            />
+                        ))}
                     </div>
                 </div>
             </div>
@@ -131,8 +177,8 @@ const Home = () => {
                                 y2="43.432"
                                 gradientUnits="userSpaceOnUse"
                             >
-                                <stop offset="0" stop-color="#0d61a9"></stop>
-                                <stop offset="1" stop-color="#16528c"></stop>
+                                <stop offset="0" stopColor="#0d61a9"></stop>
+                                <stop offset="1" stopColor="#16528c"></stop>
                             </linearGradient>
                             <path
                                 fill="url(#awSgIinfw5_FS5MLHI~A9a_yGcWL8copNNQ_gr1)"
